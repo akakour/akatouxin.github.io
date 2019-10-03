@@ -1,0 +1,29 @@
+language: node_js
+node_js: 6
+
+# S: Build Lifecycle
+install:
+  - npm install
+
+  #before_script:
+  # - npm install -g gulp
+
+script:
+  - hexo g
+
+after_script:
+  - cd ./public
+  - git init
+  - git config user.name "akatou"
+  - git config user.email "akatou@akatou.com"
+  - git add .
+  - git commit -m "edit/deploy"
+  - git push --force --quiet "https://${github_token}@${GH_REF}" master:master
+
+# E: Build LifeCycle
+branches:
+  only:
+    - hexo-source
+env:
+  global:
+    - GH_REF: github.com/akatouXin/akatouxin.github.io.git
