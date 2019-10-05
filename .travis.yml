@@ -1,12 +1,10 @@
+# 语言环境
 language: node_js
 node_js: 6
 
 # S: Build Lifecycle
 install:
   - npm install
-
-  #before_script:
-  # - npm install -g gulp
 
 script:
   - hexo g
@@ -20,7 +18,7 @@ after_script:
   - git commit -m "edit/deploy"
   - git push --force --quiet "https://${github_token}@${GH_REF}" master:master
 
-# E: Build LifeCycle
+# travis控制的分支
 branches:
   only:
     - hexo-source
