@@ -35,8 +35,22 @@
   content: "\e7d7";
 }
 
-.icon-blog:before {
-  content: "\e7d8";
+/*.icon-blog:before {*/
+/*  content: "\e7d8";*/
+/*}*/
+.icon-blog .path1:before {
+  content: "\e900";
+  color: #333;
+}
+.icon-blog .path2:before {
+  content: "\e901";
+  color: #333;
+  margin-left: -1.00390625em;
+}
+.icon-blog .path3:before {
+  content: "\e902";
+  color: #fff;
+  margin-left: -1.00390625em;
 }
 
 .icon-rss:before {
@@ -121,5 +135,9 @@
 
 .icon-github:before {
   content: "\e88d";
+}
+
+.icon-gitee:before {
+  content: "\e900";
 }
 
