@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c99acd61-b615-4823-b47b-e8f59bc2651c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/source/_posts/浅尝JVM指令集.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/_posts/浅尝JVM指令集/head.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/source/_posts/浅尝JVM的GC机制.md" beforeDir="false" afterPath="$PROJECT_DIR$/source/_posts/浅尝JVM的GC机制.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/themes/Chic/source/fonts/iconfont/iconfont.css" beforeDir="false" afterPath="$PROJECT_DIR$/themes/Chic/source/fonts/iconfont/iconfont.css" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,9 +23,9 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/source/_posts/浅尝JVM指令集" />
-    <property name="nodejs_interpreter_path" value="$PROJECT_DIR$/../nodejs/node" />
+    <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
+    <property name="settings.editor.selected.configurable" value="settings.nodejs" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -59,7 +56,7 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="82e8f022-be95-4bc5-aab6-6b4dc95963db" name="Default Changelist" comment="" />
+      <changelist id="c99acd61-b615-4823-b47b-e8f59bc2651c" name="Default Changelist" comment="" />
       <created>1565089412244</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -74,6 +71,7 @@
       <workItem from="1569334497132" duration="189000" />
       <workItem from="1569751657953" duration="2166000" />
       <workItem from="1570027410680" duration="4148000" />
+      <workItem from="1570866996215" duration="1226000" />
     </task>
     <task id="LOCAL-00001" summary="message">
       <created>1569239594896</created>
@@ -131,7 +129,14 @@
       <option name="project" value="LOCAL" />
       <updated>1570379183992</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="message">
+      <created>1570637512757</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1570637512760</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
