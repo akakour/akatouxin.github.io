@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c99acd61-b615-4823-b47b-e8f59bc2651c" name="Default Changelist" comment="message">
-      <change beforePath="$PROJECT_DIR$/source/_posts/分布式协调与同步——分布式互斥.md" beforeDir="false" afterPath="$PROJECT_DIR$/source/_posts/分布式协调与同步——分布式互斥.md" afterDir="false" />
-    </list>
+    <list default="true" id="c99acd61-b615-4823-b47b-e8f59bc2651c" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +68,7 @@
       <workItem from="1569334497132" duration="189000" />
       <workItem from="1569751657953" duration="2166000" />
       <workItem from="1570027410680" duration="4148000" />
-      <workItem from="1570866996215" duration="5000000" />
+      <workItem from="1570866996215" duration="5243000" />
     </task>
     <task id="LOCAL-00001" summary="message">
       <created>1569239594896</created>
@@ -149,7 +147,14 @@
       <option name="project" value="LOCAL" />
       <updated>1571033887012</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="message">
+      <created>1571034197780</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1571034197780</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
