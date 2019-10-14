@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c99acd61-b615-4823-b47b-e8f59bc2651c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/source/_drafts/浅尝JVM执行子系统.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/_drafts/浅尝JVM执行子系统/class-formate.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/source/_drafts/浅尝JVM执行子系统/head.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -31,15 +27,15 @@
     <property name="settings.editor.selected.configurable" value="settings.nodejs" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\LuoXin\WebstormProjects\akatouxin.github.io\source\_posts\浅尝JVM的GC机制" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\LuoXin\WebstormProjects\akatouxin.github.io\source\_posts\pdf" />
       <recent name="C:\Users\LuoXin\WebstormProjects\akatouxin.github.io\source\_posts\浅尝JVM指令集" />
       <recent name="C:\ClonedOS\blog\source\_posts\浅尝JVM的GC机制" />
       <recent name="C:\ClonedOS\blog\source\_posts\Git从入门到退坑" />
       <recent name="C:\ClonedOS\blog\.deploy_git" />
-      <recent name="C:\ClonedOS\blog\themes\Chic\source" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\LuoXin\WebstormProjects\akatouxin.github.io\source\_posts\浅尝JVM的GC机制" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -75,7 +71,7 @@
       <workItem from="1569751657953" duration="2166000" />
       <workItem from="1570027410680" duration="4148000" />
       <workItem from="1570866996215" duration="5243000" />
-      <workItem from="1571061746224" duration="746000" />
+      <workItem from="1571061746224" duration="1284000" />
     </task>
     <task id="LOCAL-00001" summary="message">
       <created>1569239594896</created>
@@ -161,7 +157,14 @@
       <option name="project" value="LOCAL" />
       <updated>1571034197780</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="message">
+      <created>1571065882046</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1571065882046</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
