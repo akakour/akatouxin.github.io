@@ -22,7 +22,7 @@ date: 2019-10-13 00:02:36
 
 -v: 列出jvm参数。
 
-![1570972092188](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjps-v.png)
+![1570972092188](浅尝JVM的工具集\jps-v.png)
 
 ## jstat
 
@@ -32,21 +32,21 @@ date: 2019-10-13 00:02:36
 
 -class (类加载器) 
 
-![1570971860655](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-class.png)
+![1570971860655](浅尝JVM的工具集\jstat-class.png)
 
 -compiler (JIT) 
 
-![1570971906439](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-compiler.png)
+![1570971906439](浅尝JVM的工具集\jstat-compiler.png)
 
 -gc (GC堆状态) 
 
-![1570971593197](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-gc.png)
+![1570971593197](浅尝JVM的工具集\jstat-gc.png)
 
 -gccapacity (各区大小) 
 
 -gccause (最近一次GC统计和原因) 
 
-![1570971685800](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-gccause.png)
+![1570971685800](浅尝JVM的工具集\jstat-gccause.png)
 
 -gcnew (新区统计)
 
@@ -60,11 +60,11 @@ date: 2019-10-13 00:02:36
 
 -gcutil (GC统计汇总)
 
-![1570972016673](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-gcutil.png)
+![1570972016673](浅尝JVM的工具集\jstat-gcutil.png)
 
 -printcompilation (HotSpot编译统计)
 
-![1570971790271](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjstat-printcomplition.png)
+![1570971790271](浅尝JVM的工具集\jstat-printcomplition.png)
 
 ## jinfo 
 
@@ -72,12 +72,13 @@ date: 2019-10-13 00:02:36
 
 jinfo –sysprops 可以查看由System.getProperties()取得的参数
 
-![1570972241200](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjinfo-sysprops.png)
+![1570972241200](浅尝JVM的工具集\jinfo-sysprops.png)
 
 jinfo –flag 未被显式指定的参数的系统默认值
 
 jinfo –flags（注意s）显示虚拟机的参数
 
-![1570973306003](C:%5CUsers%5CLuoXin%5CWebstormProjects%5Cakatouxin.github.io%5Csource%5C_posts%5C%E6%B5%85%E5%B0%9DJVM%E7%9A%84%E5%B7%A5%E5%85%B7%E9%9B%86%5Cjinfo-flags.png)
+![1570973306003](浅尝JVM的工具集\jinfo-flags.png)
 
 jinfo –flag +[参数可以增加参数，但是仅限于由查询出来且
+
