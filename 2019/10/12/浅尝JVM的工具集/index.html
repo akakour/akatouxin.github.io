@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="人若无名，则潜心练剑">
+
+
+    <meta name="keywords" content="个人博客,JAVA,后端技术">
+
+
+<title>浅尝JVM的工具集 | 羅小生的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">羅小生的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">羅小生的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">浅尝JVM的工具集</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">羅小生</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 13, 2019&nbsp;&nbsp;0:02:36</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/category/jvm性能优化/">jvm性能优化</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <h2 id="jps"><a href="#jps" class="headerlink" title="jps"></a>jps</h2><p>出当前机器上正在运行的虚拟机进程</p>
+<p><strong>常用参数</strong>：</p>
+<p>-p  :仅仅显示VM 标示，不显示jar,class, main参数等信息。</p>
+<p>-m:输出主函数传入的参数. 下的hello 就是在执行程序时从命令行输入的参数。</p>
+<p>-l: 输出应用程序主类完整package名称或jar完整名称。</p>
+<p>-v: 列出jvm参数。</p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jps-v.png" alt="1570972092188"></p>
+<h2 id="jstat"><a href="#jstat" class="headerlink" title="jstat"></a>jstat</h2><p>是用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或者远程虚拟机进程中的类装载、内存、垃圾收集、JIT编译等运行数据，在没有GUI图形界面，只提供了纯文本控制台环境的服务器上，它将是运行期定位虚拟机性能问题的首选工具。</p>
+<p><strong>常用参数</strong>：</p>
+<p>-class (类加载器) </p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-class.png" alt="1570971860655"></p>
+<p>-compiler (JIT) </p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-compiler.png" alt="1570971906439"></p>
+<p>-gc (GC堆状态) </p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-gc.png" alt="1570971593197"></p>
+<p>-gccapacity (各区大小) </p>
+<p>-gccause (最近一次GC统计和原因) </p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-gccause.png" alt="1570971685800"></p>
+<p>-gcnew (新区统计)</p>
+<p>-gcnewcapacity (新区大小)</p>
+<p>-gcold (老区统计)</p>
+<p>-gcoldcapacity (老区大小)</p>
+<p>-gcpermcapacity (永久区大小)</p>
+<p>-gcutil (GC统计汇总)</p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-gcutil.png" alt="1570972016673"></p>
+<p>-printcompilation (HotSpot编译统计)</p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jstat-printcomplition.png" alt="1570971790271"></p>
+<h2 id="jinfo"><a href="#jinfo" class="headerlink" title="jinfo"></a>jinfo</h2><p>查看和修改虚拟机的参数</p>
+<p>jinfo –sysprops 可以查看由System.getProperties()取得的参数</p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jinfo-sysprops.png" alt="1570972241200"></p>
+<p>jinfo –flag 未被显式指定的参数的系统默认值</p>
+<p>jinfo –flags（注意s）显示虚拟机的参数</p>
+<p><img src="/2019/10/12/浅尝JVM的工具集/jinfo-flags.png" alt="1570973306003"></p>
+<p>jinfo –flag +[参数可以增加参数，但是仅限于由查询出来且</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>羅小生</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/java/"># java</a>
+                    
+                        <a href="/tag/jvm/"># jvm</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/10/13/分布式协调与同步——分布式互斥/">分布式协调与同步——分布式互斥</a>
+            
+            
+            <a class="next" rel="next" href="/2019/10/09/浅尝JVM指令集/">浅尝JVM指令集</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© <a href="https://akatouxin.github.io/about/" target="_blank">羅小生</a> | <a href="https://github.com/akatouXin" target="_blank">人若无名，则潜心练剑.</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

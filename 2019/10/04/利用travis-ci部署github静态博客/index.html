@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="人若无名，则潜心练剑">
+
+
+    <meta name="keywords" content="个人博客,JAVA,后端技术">
+
+
+<title>利用travis-ci部署github静态博客 | 羅小生的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">羅小生的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">羅小生的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">利用travis-ci部署github静态博客</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">羅小生</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 5, 2019&nbsp;&nbsp;0:59:48</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/category/持续集成/">持续集成</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><img src="/2019/10/04/利用travis-ci部署github静态博客/head.jpg" alt="1570205299600"></p>
+<h1 id="利用Travis-ci部署Github静态博客"><a href="#利用Travis-ci部署Github静态博客" class="headerlink" title="利用Travis-ci部署Github静态博客"></a>利用Travis-ci部署Github静态博客</h1><h2 id="何为Travis-ci"><a href="#何为Travis-ci" class="headerlink" title="何为Travis-ci"></a>何为Travis-ci</h2><p><a href="[https://www.travis-ci.org](https://www.travis-ci.org/)">Travis CI</a> 是目前新兴的开源持续集成构建项目，它与<code>Jenkins</code>，<code>GO</code>的很明显的特别在于采用<code>yaml</code>格式，同时他是个在线的服务，不像jenkins需要你本地架设服务器，简洁清新独树一帜。目前大多数的github项目都已经移入到Travis CI的构建队列中，据说Travis CI每天运行超过万次完整构建。对于做开源项目或者github的使用者，将项目加入travis ci是个不错的选择。</p>
+<h2 id="预到目标"><a href="#预到目标" class="headerlink" title="预到目标"></a>预到目标</h2><p>使用<code>Hexo</code>搭建托管在<code>Github</code>上的个人博客,每次本地写完，本地编译以后推送到Github，但是随着博客数量的增大，本地编译花费的时间越来越大，所以一开始想着是否可以利用<code>Webhook</code>机制来通知另一台服务器自行编译部署。但是随之而来的问题是需要另一台服务器，又增加了成本。后来了解到Travis ci，在博客根目录配置好Travis ci以后，每当把博客的源码推送到仓库特定分支以后，会由Github来通知Travis ci来编译并且部署。</p>
+<p>##　如何配置</p>
+<h3 id="配置Github和Travs-ci"><a href="#配置Github和Travs-ci" class="headerlink" title="配置Github和Travs ci"></a>配置Github和Travs ci</h3><p>1 在<code>Travis Ci</code>用<code>Github</code>账号登陆以后，会看见自己已经托管在<code>Github</code>的仓库，开启博客仓库。<img src="/2019/10/04/利用travis-ci部署github静态博客/travi-ci.png" alt="1570248918257"></p>
+<p>2 在<code>Github</code>生成<code>access token</code>，并在<code>Travi ci</code>的环境变量<code>Env</code>中填好token，值得注意的是，<strong>在github创建access token的时候，需要记下这个token，因为一旦创建之后是不能看见的，如果没记下，那就需要重新创建了</strong>。</p>
+<p><img src="/2019/10/04/利用travis-ci部署github静态博客/token.png" alt="1570252886503"></p>
+<p><img src="/2019/10/04/利用travis-ci部署github静态博客/travis.png" alt="1570252973879"></p>
+<p>这样一来。Travis中的<code>github_token</code>就可以在Travis脚本中以环境变量的形式直接引用。</p>
+<h3 id="创建-travis-yml配置脚本"><a href="#创建-travis-yml配置脚本" class="headerlink" title="创建.travis.yml配置脚本"></a>创建.travis.yml配置脚本</h3><p>在travis ci中，所有行为都是由一个被放在仓库根目录的<code>.travis.yml</code>的配置文件所控制。具体可以查看<a href="https://docs.travis-ci.com/" target="_blank" rel="noopener">Travis document</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语言环境</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">node_js</span></span><br><span class="line"><span class="attr">node_js:</span> <span class="number">6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># S: Build Lifecycle</span></span><br><span class="line"><span class="attr">install:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">hexo</span> <span class="string">g</span></span><br><span class="line"><span class="comment"># 具体的编译部署shell</span></span><br><span class="line"><span class="attr">after_script:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">cd</span> <span class="string">./public</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">init</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">config</span> <span class="string">user.name</span> <span class="string">"akatou"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">config</span> <span class="string">user.email</span> <span class="string">"akatou@akatou.com"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">add</span> <span class="string">.</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">commit</span> <span class="bullet">-m</span> <span class="string">"edit/deploy"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">push</span> <span class="bullet">--force</span> <span class="bullet">--quiet</span> <span class="string">"https://$&#123;github_token&#125;@$&#123;GH_REF&#125;"</span> <span class="attr">master:master</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># travis控制的分支</span></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line"><span class="attr">  only:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">hexo-source</span></span><br><span class="line"><span class="attr">env:</span></span><br><span class="line"><span class="attr">  global:</span></span><br><span class="line"><span class="attr">    - GH_REF:</span> <span class="string">github.com/akatouXin/akatouxin.github.io.git</span></span><br></pre></td></tr></table></figure>
+
+<p>其中<code>${github_token}</code>就是刚刚在travi中创建的环境变量名。</p>
+<h2 id="运行流程"><a href="#运行流程" class="headerlink" title="运行流程"></a>运行流程</h2><p>Travis 的运行流程很简单，任何项目都会经过两个阶段。</p>
+<blockquote>
+<ul>
+<li>install 阶段：安装依赖</li>
+<li>script 阶段：运行脚本</li>
+</ul>
+</blockquote>
+<h3 id="install-字段"><a href="#install-字段" class="headerlink" title="install 字段"></a>install 字段</h3><p><code>install</code>字段用来指定安装脚本。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">install:</span> <span class="string">npm</span> <span class="string">install</span></span><br></pre></td></tr></table></figure>
+
+<p>如果有多个脚本，可以写成下面的形式。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">install:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">command1</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">command2</span></span><br></pre></td></tr></table></figure>
+
+<p>上面代码中，如果<code>command1</code>失败了，整个构建就会停下来，不再往下进行。</p>
+<p>如果不需要安装，即跳过安装阶段，就直接设为<code>true</code>。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">install:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="script-字段"><a href="#script-字段" class="headerlink" title="script 字段"></a>script 字段</h3><p><code>script</code>字段用来指定构建或测试脚本。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">script:</span>   <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">g</span></span><br></pre></td></tr></table></figure>
+
+<p>如果有多个脚本，可以写成下面的形式。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">script:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">command1</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">command2</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，<code>script</code>与<code>install</code>不一样，如果<code>command1</code>失败，<code>command2</code>会继续执行。但是，整个构建阶段的状态是失败。</p>
+<p>如果<code>command2</code>只有在<code>command1</code>成功后才能执行，就要写成下面这样。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">script:</span> <span class="string">command1</span> <span class="string">&amp;&amp;</span> <span class="string">command2</span></span><br></pre></td></tr></table></figure>
+
+<p>更多设置请看<a href="https://docs.travis-ci.com/user/languages/javascript-with-nodejs/" target="_blank" rel="noopener">官方文档</a>。</p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p><code>script</code>阶段结束以后，还可以设置<a href="https://docs.travis-ci.com/user/notifications/" target="_blank" rel="noopener">通知步骤</a>（notification）和<a href="https://docs.travis-ci.com/user/deployment/" target="_blank" rel="noopener">部署步骤</a>（deployment），它们不是必须的。</p>
+<p>部署的脚本可以在<code>script</code>阶段执行，也可以使用 Travis 为几十种常见服务提供的快捷部署功能。比如，要部署到 <a href="https://docs.travis-ci.com/user/deployment/pages/" target="_blank" rel="noopener">Github Pages</a>，可以写成下面这样。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line"><span class="attr">  provider:</span> <span class="string">pages</span></span><br><span class="line"><span class="attr">  skip_cleanup:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">  github_token:</span> <span class="string">$github_token</span> <span class="comment"># Set in travis-ci.org dashboard</span></span><br><span class="line"><span class="attr">  on:</span></span><br><span class="line"><span class="attr">    branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<p>其他部署方式，请看<a href="https://docs.travis-ci.com/user/deployment/" target="_blank" rel="noopener">官方文档</a>。</p>
+<h3 id="钩子方法"><a href="#钩子方法" class="headerlink" title="钩子方法"></a>钩子方法</h3><p>Travis 为上面这些阶段提供了7个钩子。</p>
+<blockquote>
+<ul>
+<li>before_install：install 阶段之前执行</li>
+<li>before_script：script 阶段之前执行</li>
+<li>after_failure：script 阶段失败时执行</li>
+<li>after_success：script 阶段成功时执行</li>
+<li>before_deploy：deploy 步骤之前执行</li>
+<li>after_deploy：deploy 步骤之后执行</li>
+<li>after_script：script 阶段之后执行</li>
+</ul>
+</blockquote>
+<p>完整的生命周期，从开始到结束是下面的流程。</p>
+<blockquote>
+<ol>
+<li>before_install</li>
+<li>install</li>
+<li>before_script</li>
+<li>script</li>
+<li>after<em>success or after</em>failure</li>
+<li>[OPTIONAL] before_deploy</li>
+<li>[OPTIONAL] deploy</li>
+<li>[OPTIONAL] after_deploy</li>
+<li>after_script</li>
+</ol>
+</blockquote>
+<p>下面是一个<code>after_script</code>钩子的例子。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">after_script:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">cd</span> <span class="string">./public</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">init</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">config</span> <span class="string">user.name</span> <span class="string">"akatou"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">config</span> <span class="string">user.email</span> <span class="string">"akatou@akatou.com"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">add</span> <span class="string">.</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">commit</span> <span class="bullet">-m</span> <span class="string">"edit/deploy"</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">git</span> <span class="string">push</span> <span class="bullet">--force</span> <span class="bullet">--quiet</span> <span class="string">"https://$&#123;github_token&#125;@$&#123;GH_REF&#125;"</span> <span class="attr">master:master</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="运行状态"><a href="#运行状态" class="headerlink" title="运行状态"></a>运行状态</h3><p>最后，Travis 每次运行，可能会返回四种状态。</p>
+<ul>
+<li>passed：运行成功，所有步骤的退出码都是<code>0</code></li>
+<li>canceled：用户取消执行</li>
+<li>errored：<code>before_install</code>、<code>install</code>、<code>before_script</code>有非零退出码，运行会立即停止</li>
+<li>failed ：<code>script</code>有非零状态码 ，会继续运行</li>
+</ul>
+<h2 id="查看Travis运行log"><a href="#查看Travis运行log" class="headerlink" title="查看Travis运行log"></a>查看Travis运行log</h2><p><img src="/2019/10/04/利用travis-ci部署github静态博客/log.png" alt="1570254722704"></p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>羅小生</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/博客/"># 博客</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/10/09/浅尝JVM指令集/">浅尝JVM指令集</a>
+            
+            
+            <a class="next" rel="next" href="/2019/10/02/浅尝JVM的GC机制/">浅尝JVM的GC机制</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© <a href="https://akatouxin.github.io/about/" target="_blank">羅小生</a> | <a href="https://github.com/akatouXin" target="_blank">人若无名，则潜心练剑.</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="人若无名，则潜心练剑">
+
+
+    <meta name="keywords" content="个人博客,JAVA,后端技术">
+
+
+<title>浅尝JVM的GC机制 | 羅小生的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">羅小生的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">羅小生的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">浅尝JVM的GC机制</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">羅小生</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 2, 2019&nbsp;&nbsp;23:46:36</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/category/jvm性能优化/">jvm性能优化</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><img src="/2019/10/02/浅尝JVM的GC机制/head.png" alt="head"></p>
+<h1 id="浅尝「JVM的GC机制」ーGC与内存分配策略"><a href="#浅尝「JVM的GC机制」ーGC与内存分配策略" class="headerlink" title="浅尝「JVM的GC机制」ーGC与内存分配策略"></a>浅尝「JVM的GC机制」ーGC与内存分配策略</h1><h2 id="从如何区分GC对象说起"><a href="#从如何区分GC对象说起" class="headerlink" title="从如何区分GC对象说起"></a>从如何区分GC对象说起</h2><h3 id="引用计数算法"><a href="#引用计数算法" class="headerlink" title="引用计数算法"></a>引用计数算法</h3><p>顾名思义，就是如果一个对象被另一个对象正在引用，则引用计数＋１，如果被另一个对象解除引用关系，则计数－1，当GC的时候，引用计数=0的那些对象就应该被GC了。</p>
+<ul>
+<li>优点：简单，易理解。</li>
+<li>缺点：存在互相引用，会造成永驻。这个就类似于死锁的概念，A引用B，B引用A，各自计数为1，但实际上，AB存在没有意义，消耗内存。</li>
+<li>应用：这一种算法，虽然存在致命的缺点，但是在早期的Windows系统和Doc系统中被使用。</li>
+</ul>
+<h3 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h3><p><img src="/2019/10/02/浅尝JVM的GC机制/1570029840056.png" alt="1570029840056"></p>
+<h4 id="GC-Root根"><a href="#GC-Root根" class="headerlink" title="GC Root根"></a>GC Root根</h4><p>在Java中，可以被当作GC Root根的有：统称GC Roots Set</p>
+<ul>
+<li>方法区: 类静态属性引用的对象; </li>
+<li>方法区: 常量引用的对象; </li>
+<li>虚拟机栈(局部变量表)中引用的对象. </li>
+<li>本地方法栈JNI(Native方法)中引用 的对象</li>
+</ul>
+<p>JVM的垃圾回收器，会从上记四个地方的对象开始分析（统计学上，绝大多数还是栈上的局部变量表开始），依次找到引用的对象，并递归寻找，找到引用的引用，依次一直找到最后一个对象，这样就行成完整的引用关系链/网。在这个集合（Object1，Object2，Object3，Object4）以外的都是流离对象（Object5，Object6，Object7），应该被GC。</p>
+<p>实际中，即使在可达的引用对象，也有可能会被GC回收的。这就要看这个对象的引用时什么引用了。</p>
+<h4 id="引用分类"><a href="#引用分类" class="headerlink" title="引用分类"></a>引用分类</h4><h5 id="强引用"><a href="#强引用" class="headerlink" title="强引用"></a>强引用</h5><p>一般的Object obj = new Object() ，就属于强引用。</p>
+<h5 id="软引用"><a href="#软引用" class="headerlink" title="软引用"></a>软引用</h5><p>SoftReference，一些有用但是并非必需，用软引用关联的对象（由SoftReference对象封装），系统将要发生OOM之前，这些对象就会被回收。参见代码：</p>
+<h5 id="弱引用"><a href="#弱引用" class="headerlink" title="弱引用"></a>弱引用</h5><p>WeakReference，一些有用（程度比软引用更低）但是并非必需，用弱引用关联的对象（由WeakReference对象封装），只能生存到下一次垃圾回收之前，GC发生时，不管内存够不够，都会被回收。</p>
+<h5 id="虚引用"><a href="#虚引用" class="headerlink" title="虚引用"></a>虚引用</h5><p>也叫幽灵引用，最弱，被垃圾回收的时候收到一个通知</p>
+<h4 id="简而言之"><a href="#简而言之" class="headerlink" title="简而言之"></a>简而言之</h4><p>如果是强引用的话，那就是new对象的引用，它是完全的要看是否可达，可达不会被GC；</p>
+<p>如果是软引用，在OOM之前的那次full GC的时候，即使可达也会被GC；</p>
+<p>如果是弱引用，不管是否可达，在下一次GC一定会被GC；</p>
+<p>虚引用，实际上没有可达的分析必要，（其存在的意义就是单纯的给GC一个通知，通知GC应该GC了）一定会被GC。</p>
+<blockquote>
+<p>多种引用存在的意义</p>
+<p>软引用 SoftReference和弱引用 WeakReference，可以用在内存资源紧张的情况下以及创建不是很重要的数据缓存。当系统内存不足的时候，缓存中的内容是可以被释放的。</p>
+<p>例如，一个程序用来处理用户提供的图片。如果将所有图片读入内存，这样虽然可以很快的打开图片，但内存空间使用巨大，一些使用较少的图片浪费内存空间，需要手动从内存中移除。如果每次打开图片都从磁盘文件中读取到内存再显示出来，虽然内存占用较少，但一些经常使用的图片每次打开都要访问磁盘，代价巨大。这个时候就可以用软引用构建缓存。</p>
+</blockquote>
+<h2 id="GC算法与分代收集"><a href="#GC算法与分代收集" class="headerlink" title="GC算法与分代收集"></a>GC算法与分代收集</h2><h3 id="标记-清除算法（Mark-Sweep）"><a href="#标记-清除算法（Mark-Sweep）" class="headerlink" title="标记-清除算法（Mark-Sweep）"></a>标记-清除算法（Mark-Sweep）</h3><p><img src="/2019/10/02/浅尝JVM的GC机制/1570031198672.png" alt="1570031198672"></p>
+<p>该算法要点是：分为两个环节,标记，清除。首先标记出所有需要回收的对象，在标记完成后统一回收所有被标记的对象。</p>
+<p>优点：简单明了。</p>
+<p>缺点：造成内存碎片化。标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致以后在程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。比如上图中，假设一个可写区域为1kb，如果要存储6kb以上的数据，会存不进去（连续划分），即使这时候可写为15kb的数据。</p>
+<h3 id="复制算法（Copying）"><a href="#复制算法（Copying）" class="headerlink" title="复制算法（Copying）"></a>复制算法（Copying）</h3><p><img src="/2019/10/02/浅尝JVM的GC机制/1570031427891.png" alt="1570031427891"></p>
+<p>该算法的要点是：将内存区域划分成大小相等的两快，一次只使用其中一快，将另一快区域置空。当GC发生的时候，将存活对象依个Copy到另一个快中，并清空这快以便下次使用。</p>
+<p>优点：避免了内存碎片化。只需要按顺序分配即可，规避了M-S算法的缺点。实现简单，运行高效。</p>
+<p>缺点：造成内存浪费，因为某一时间内总是只有一块在使用。</p>
+<h3 id="标记-整理算法（Mark-Compact）"><a href="#标记-整理算法（Mark-Compact）" class="headerlink" title="标记-整理算法（Mark-Compact）"></a>标记-整理算法（Mark-Compact）</h3><p><img src="/2019/10/02/浅尝JVM的GC机制/1570031814760.png" alt="1570031814760"></p>
+<p>该算法的要点是：结合了上面两种算法的优点，首先标记出所有需要回收的对象，在标记完成后，后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动（Copy），然后直接清理掉端边界以外的内存。</p>
+<p>优点：避免碎片化，提高了内存使用效率。</p>
+<p>缺点：性能相对较差，因为要做的事情三者中最复杂。</p>
+<h3 id="JavaGC的分代收集"><a href="#JavaGC的分代收集" class="headerlink" title="JavaGC的分代收集"></a>JavaGC的分代收集</h3><p>当前商业虚拟机的垃圾收集都采用“分代收集”（Generational Collection）算法，在此算法中，把Java堆分为新生代和老年代，这样就可以根据各个年代的特点采用最适当的收集算法。</p>
+<p>专门研究表明，新生代中的对象<code>98%</code>是“朝生夕死”的，所以并不需要按照1:1的比例来划分内存空间，而是将内存分为一块<code>较大的Eden空间</code>和<code>两块较小的Survivor空间</code>，每次使用Eden和其中一块Survivor[1]。当回收时，将Eden和Survivor中还存活着的对象一次性地复制到另外一块Survivor空间上，最后清理掉Eden和刚才用过的Survivor空间。HotSpot虚拟机默认Eden和Survivor的大小比例是<code>8:1</code>，也就是每次新生代中可用内存空间为整个新生代容量的90%（80%+10%），只有10%的内存会被“浪费”。当然，98%的对象可回收只是一般场景下的数据，我们没有办法保证每次回收都只有不多于10%的对象存活，当Survivor空间不够用时，需要依赖其他内存（这里指老年代）进行<code>分配担保（Handle Promotion）</code>。</p>
+<p>在<code>新生代</code>中，每次垃圾收集时都发现有大批对象死去，只有少量存活，那就选用<code>复制算法</code>，只需要付出少量存活对象的复制成本就可以完成收集。而<code>老年代</code>中因为对象存活率高、没有额外空间对它进行分配担保，就必须使用<code>“标记—清理”</code>或者<code>“标记—整理”</code>算法来进行回收。</p>
+<h2 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h2><p>在JVM中，上述三种算法综合使用的分代收集的GC策略，由此也衍生出不少的垃圾回收器。</p>
+<p><img src="/2019/10/02/浅尝JVM的GC机制/Gc-m.png" alt="1570369346397"></p>
+<blockquote>
+<p>查看GC回收器：java -XX:+PringCommandLineFlags -version</p>
+</blockquote>
+<h3 id="新生代"><a href="#新生代" class="headerlink" title="新生代"></a>新生代</h3><table>
+<thead>
+<tr>
+<th align="left">收集器</th>
+<th align="left">收集对象和算法</th>
+<th align="left">收集器类型</th>
+<th align="left">说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Serial</td>
+<td align="left">新生代；<br>复制算法</td>
+<td align="left">单线程</td>
+<td align="left">进行垃圾回收的时候，必须挂起所有业务类线程，STW</td>
+<td>简单高效；内存不大的场景</td>
+</tr>
+<tr>
+<td align="left">ParNew</td>
+<td align="left">新生代；<br>复制算法</td>
+<td align="left">并行的多线程</td>
+<td align="left">ParNew是Serial的多线程版本</td>
+<td>搭配CMS的首选</td>
+</tr>
+<tr>
+<td align="left">Parallel Scavenge</td>
+<td align="left">新生代；<br>复制算法</td>
+<td align="left">并行的多线程</td>
+<td align="left">类似于ParNew，但更注重吞吐量</td>
+<td>Server端多CPU的默认GC，主要适合后台运算不需要 太多交互的任务；</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>吞吐量=运行用户代码时间/(运行用户代码时间+ 垃圾收集时间)</p>
+<p>垃圾收集时间= 垃圾回收频率 * 单次垃圾回收时间</p>
+</blockquote>
+<h3 id="老年代"><a href="#老年代" class="headerlink" title="老年代"></a>老年代</h3><table>
+<thead>
+<tr>
+<th align="left">收集器</th>
+<th>收集对象和算法</th>
+<th>收集器类型</th>
+<th align="left">说明</th>
+<th align="left">使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Serial Old</td>
+<td>老年代；<br>标记-整理</td>
+<td>单线程</td>
+<td align="left">jdk7/8默认的老年代回收器</td>
+<td align="left">Client模式下适用</td>
+</tr>
+<tr>
+<td align="left">Parallel Old</td>
+<td>老年代；<br>标记-整理</td>
+<td>并发的多线程</td>
+<td align="left">Parallel Scavenge回收器的老年代版本，<br>为了配合Parallel Scavenge的高吞吐而开发。</td>
+<td align="left">注重高吞吐和CPU资源敏感的场景</td>
+</tr>
+<tr>
+<td align="left">CMS</td>
+<td>老年代；<br>标记-清除</td>
+<td>并行与并发</td>
+<td align="left">尽可能的缩短垃圾收集时用户线程停止时间；<br>缺点 在于：1.内存碎片 2.需要更多cpu资源 3.浮动垃圾问题，需要更大的堆空间</td>
+<td align="left">重响应速度、系统停顿时间和用户体验的系统。<br>互联网后端目 前cms是主流的垃圾回收器；</td>
+</tr>
+<tr>
+<td align="left">G1</td>
+<td>跨新生代和老年 代；<br>标记整理 + 化整为零</td>
+<td>并行与并发</td>
+<td align="left">JDK1.7才正式引入，采 用分区回收的思维，基本 不牺牲吞吐量的前提下完 成低停顿的内存回收；<br>可 预测的停顿是其最大的优 势；</td>
+<td align="left">面向服务端应用的 垃圾回收器，目标 为取代CMS</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>并行：垃圾收集的多线程的同时进行。</p>
+<p>并发：垃圾收集的多线程和应用的多线程同时进行。</p>
+</blockquote>
+<h3 id="垃圾收集器分类"><a href="#垃圾收集器分类" class="headerlink" title="垃圾收集器分类"></a>垃圾收集器分类</h3><h4 id="Serial-Serial-Old"><a href="#Serial-Serial-Old" class="headerlink" title="Serial / Serial Old"></a>Serial / Serial Old</h4><h5 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h5><p>单线程，独占式，古老而稳定，适合单CPU/服务器。</p>
+<blockquote>
+<p>-XX:+UserSerialGC  新生代，老年代都用串行收集器</p>
+</blockquote>
+<h4 id="ParNew-Serial-Old"><a href="#ParNew-Serial-Old" class="headerlink" title="ParNew / Serial Old"></a>ParNew / Serial Old</h4><h5 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h5><p>和Serial基本没啥区别，唯一区别就是：多线程多CPU，所以停顿时间教Seria短。</p>
+<blockquote>
+<p>-XX:+UserParNewGC  新生代用ParNew，老年代用Seril Old。</p>
+</blockquote>
+<h4 id="Parallel-Scavenge（ParallerGC）-Parallel-Old"><a href="#Parallel-Scavenge（ParallerGC）-Parallel-Old" class="headerlink" title="Parallel Scavenge（ParallerGC）/ Parallel Old"></a>Parallel Scavenge（ParallerGC）/ Parallel Old</h4><h5 id="特点-2"><a href="#特点-2" class="headerlink" title="特点"></a>特点</h5><p>关注<strong>吞吐量</strong>，高吞吐意味着可以高效利用CPU。适用于后台运算而不需要太多交互的服务端应用。</p>
+<h5 id="常用的几个参数"><a href="#常用的几个参数" class="headerlink" title="常用的几个参数"></a>常用的几个参数</h5><blockquote>
+<ul>
+<li><p><code>-XX:+UseParallerOldGC</code>  新生代用ParallerGC，老年代用Parallel Old</p>
+</li>
+<li><p><code>-XX:+UseParallelGC</code>  新生代用ParallerGC，老年代用Serial Old。</p>
+</li>
+<li><p><code>-XX:MaxGCPauseMills</code>  参数是一个大于0的毫秒数，此命令的意思是：叫垃圾回收器在这个时间段类完成一次GC。但是，这并不意味着，设定值越小GC越快效果越好。实际上，其核心是牺牲吞吐量和新生代的空间来换取的，也就是牺牲空间换时间。比如，把新生代从500m变成300m，所以每次回收停顿时间就变小了，从100ms变到70ms，但是GC频率却变高了，吞吐量变低了。</p>
+</li>
+<li><p><code>-XX:GCTimeRatio</code>  参数是一个大于0小于100的整数，表示的是垃圾收集时间占总时间的比率，相当于吞吐量的倒数。比如 -XX:GCtimeRatio 19 ，那允许最大GC占总时间的1/5 （19/19+1）,缺省时是99，即允许最大1%。</p>
+</li>
+<li><p><code>-XX:+UseAdaptiveSizePoliy</code>  当这个参数打开以后，就无需手动去指定新生代堆大小（-Xmn），Eden与Survivor区的比例（-XX:SurvivorRatio）,晋升老年代的最大分代年龄（-XX:PretenureSizeThreshold）等。虚拟机会根据当前系统资源情况，动态调整这些参数以提供最合适的停顿时间或最大吞吐量。这个称为<strong>GC自适应调节策略</strong>。</p>
+</li>
+</ul>
+<p>在对于垃圾回收器运作原理不太了解的情况下，使用<code>Parallel Scavenge</code>的自适应调节策略是一种不错的选择。只需要把基本内存数据设置好（最大堆-Xmx等），然后用MaxGCPauseMills（重最大停顿时间）或者GCTimeRatio（重吞吐量）给虚拟机一个运行状态目标，然后剩下的工作由虚拟机自行完成。<strong><em>自适应策略是Parallel Scavenge和ParNew的一个重要区别</em></strong></p>
+</blockquote>
+<h4 id="Concurrent-Mark-Sweep-CMS"><a href="#Concurrent-Mark-Sweep-CMS" class="headerlink" title="Concurrent Mark Sweep (CMS)"></a>Concurrent Mark Sweep (CMS)</h4><p>一款“标记-清除”垃圾收集器。回收停顿时间短，并发并行，但是会产生浮动垃圾。适用于对服务响应要求敏感的应用。</p>
+<h5 id="运作周期"><a href="#运作周期" class="headerlink" title="运作周期"></a>运作周期</h5><ol>
+<li>初始标记：短暂。仅仅是标记一下GC Roots能直接关联的对象（一级对象）。</li>
+<li>并发标记：并发，没有Stop the world，进行GC RootsTracing过程，可达性分析。</li>
+<li>重新标记：并发，为了修正并发标记过程，程序运行产生的新对象。比初始标记稍长，但远比并发标记短。</li>
+<li>并发清除：由于整个过程中耗时最长的并发标记和并发清除过程收集器线程都可以与用户线程一起工作，所以，从总体上来说，CMS收集器的内存回收过程是与用户线程一起并发执行的。</li>
+</ol>
+<p>这一阶段，由于并发，会产生<code>浮动垃圾</code>，因为即使CMS已经在并发清除，但是应用线程这个阶段产生的垃圾在标记之后，<u>不会在当次收集中处理掉，只会在下一次被回收</u>。</p>
+<h5 id="常用的几个参数-1"><a href="#常用的几个参数-1" class="headerlink" title="常用的几个参数"></a>常用的几个参数</h5><blockquote>
+<ul>
+<li><code>-XX:+UserConcMarkSweepGC</code>  表示新生代用ParNew，老年代用CMS。</li>
+<li><code>-XX:CMSInitialOccupyFraction</code>  因为CMS是并行并发收集，所以不能等老年代几乎满了才触发，要不然这时候应用线程就会报<code>Concurrent Mode Failure</code>异常了。这个参数就是设置当老年区到达指定内存一定比率的时候触发CMS。早期版本中，默认是68%。在jdk1.6以后，默认是92%。如果超过阈值，会有一个预备方案：JVM将临时启用<code>Serial Old</code>收集器来重新进行老年代的垃圾收集，这样停顿时间就很长了,性能变差。</li>
+<li><code>-XX:+UseCMSCompactAtFullCollection</code>  （默认开启）由于CMS是并发清除，所以会导致内存碎片化，加上这个参数会使得CMS在并发清除阶段还会整理内存碎片。由于整理过程没法并发，所以会降低回收效率。</li>
+<li><code>-XX：CMSFullGCsBeforeCompaction</code>   （默认值为0，表示每次进入FullGC时都进行碎片整理）这个参数是用于设置执行多少次不压缩的Full GC后，跟着来一次压缩的。</li>
+</ul>
+</blockquote>
+<h4 id="G1"><a href="#G1" class="headerlink" title="G1"></a>G1</h4><p>1.8正式商用。特点是：并行并发，分代收集，空间整理。从整体上看：标记-整理算法，局部上是复制算法。</p>
+<blockquote>
+<p><strong>并行并发</strong>：G1充分利用多核CPU硬件优势，来缩短STW停顿时间。</p>
+<p><strong>分代收集</strong>：与其他收集器一样，分代的概念在G1中也有。与其他不同的是，在内存分布上，G1将整个Java堆划分为多个大小相等的独立区域（Region），虽然还保留有新生代和老年代的概念，但新生代和老年代不再是物理隔离的了，它们都是一部分Region（不需要连续）的集合。</p>
+<p><strong>空间整合</strong>：G1整体上是标记-整理，局部上是复制算法，两种算法都不会产生内存碎片。这种特性有利于程序长时间运行。</p>
+</blockquote>
+<h5 id="G1的并发标记周期"><a href="#G1的并发标记周期" class="headerlink" title="G1的并发标记周期"></a>G1的并发标记周期</h5><ol>
+<li><strong>初始标记：</strong>短暂，仅仅只是标记一下GC Roots能直接关联到的对象，速度很快，产生一个全局停顿，都伴随有一次新生代的GC。</li>
+<li><strong>根区域扫描：</strong>扫描survivor区可以直接到达的老年代区域。</li>
+<li><strong>并发标记阶段：</strong>扫描和查找整个堆的存活对象，并标记。</li>
+<li><strong>重新标记：</strong>会产生全局停顿，对并发标记阶段的结果进行修正。</li>
+<li><strong>独占清理</strong>：会产生全局停顿，对GC回收比例进行排序，供混合收集阶段使用</li>
+<li><strong>并发清理</strong>：识别并清理完全空闲的区域，并发进行</li>
+</ol>
+<h5 id="混合收集"><a href="#混合收集" class="headerlink" title="混合收集"></a>混合收集</h5><p>对含有垃圾比例较高的Region进行优先回收处理。</p>
+<h5 id="几个常见参数"><a href="#几个常见参数" class="headerlink" title="几个常见参数"></a>几个常见参数</h5><blockquote>
+<p><code>-XX:+UserG1GC</code>   开启G1垃圾收集器</p>
+<p><code>-XX:MaxGCPauseMillis</code> 指定目标的最大停顿时间，G1尝试调整新生代和老年代的比例，堆大小，晋升年龄来达到这个目标时间。</p>
+<p><code>-XX:ParallerGCThreads</code>：设置GC的工作线程数量</p>
+</blockquote>
+<h4 id="ZGC"><a href="#ZGC" class="headerlink" title="ZGC"></a>ZGC</h4><p>java11引入，特点是：通过技术手段把stw的情况控制在仅有一次，就是第一次的初始标记才会发生，这样也就不难理解为什么GC停顿时间不随着堆增大而上升</p>
+<p>关键技术</p>
+<ol>
+<li><strong>有色指针（Colored      Pointers**</strong>）**</li>
+<li><strong>加载屏障（Load      Barrier**</strong>）**</li>
+</ol>
+<h2 id="内存分配与回收策略"><a href="#内存分配与回收策略" class="headerlink" title="内存分配与回收策略"></a>内存分配与回收策略</h2><h3 id="对象优先在Eden分配"><a href="#对象优先在Eden分配" class="headerlink" title="对象优先在Eden分配"></a>对象优先在Eden分配</h3><p>eden区内存不足，发生Minor GC。</p>
+<h3 id="大对象直接进入老年区"><a href="#大对象直接进入老年区" class="headerlink" title="大对象直接进入老年区"></a>大对象直接进入老年区</h3><p>大对象：需要大量连续内存空间的Java对象，比如很长的字符串和大型数组，1、导致内存有空间，还是需要提前进行垃圾回收获取连续空间来放他们，2、会进行大量的内存复制。</p>
+<p><code>-XX:PretenureSizeThreshold</code> 参数 ，大于这个数量直接在老年代分配，缺省为0 ，表示绝不会直接分配在老年代。</p>
+<h3 id="长期存活的对象将进入老年代"><a href="#长期存活的对象将进入老年代" class="headerlink" title="长期存活的对象将进入老年代"></a>长期存活的对象将进入老年代</h3><p>默认15，<code>-XX:MaxTenuringThreshold</code>调整</p>
+<h3 id="动态对象年龄判定"><a href="#动态对象年龄判定" class="headerlink" title="动态对象年龄判定"></a>动态对象年龄判定</h3><p><u>特殊情况，晋升条件可以无视分代年龄。</u>为了能更好地适应不同程序的内存状况，虚拟机并不是永远地要求对象的年龄必须达到了<code>MaxTenuringThreshold</code>才能晋升老年代，如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无须等到<code>MaxTenuringThreshold</code>中要求的年龄</p>
+<h3 id="空间分配担保"><a href="#空间分配担保" class="headerlink" title="空间分配担保"></a>空间分配担保</h3><p><u>特殊情况可以提前晋升</u>。新生代中有大量的对象存活，survivor空间不够，当出现大量对象在MinorGC后仍然存活的情况（最极端的情况就是内存回收后新生代中所有对象都存活），就需要老年代进行分配担保，把Survivor无法容纳的对象直接进入老年代.只要老年代的连续空间大于新生代对象的总大小或者历次晋升的平均大小，就进行Minor GC，否则FullGC。</p>
+
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>羅小生</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/java/"># java</a>
+                    
+                        <a href="/tag/jvm/"># jvm</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+                <a class="prev" rel="prev" href="/2019/10/04/利用travis-ci部署github静态博客/">利用travis-ci部署github静态博客</a>
+            
+            
+            <a class="next" rel="next" href="/2019/09/21/浅尝JVM底层原理/">浅尝JVM底层原理</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© <a href="https://akatouxin.github.io/about/" target="_blank">羅小生</a> | <a href="https://github.com/akatouXin" target="_blank">人若无名，则潜心练剑.</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>

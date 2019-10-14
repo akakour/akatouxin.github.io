@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="description" content="人若无名，则潜心练剑">
+
+
+    <meta name="keywords" content="个人博客,JAVA,后端技术">
+
+
+<title>分布式协调与同步——分布式互斥 | 羅小生的博客</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/script.js"></script>
+    
+    <script src="/js/tocbot.min.js"></script>
+    
+
+
+
+    
+    
+        
+    
+
+
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-header header-logo"><a href="/">羅小生的博客</a></div>
+            <div class="menu navbar-right">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+                <input id="switch_default" type="checkbox" class="switch_default">
+                <label for="switch_default" class="toggleBtn"></label>
+            </div>
+
+        </div>
+    </nav>
+
+    
+    <nav class="navbar-mobile" id="nav-mobile">
+        <div class="container">
+            <div class="navbar-header">
+                <div>
+                    <a href="/">羅小生的博客</a><a id="mobile-toggle-theme">·&nbsp;Light</a>
+                </div>
+                <div class="menu-toggle" onclick="mobileBtn()">&#9776; Menu</div>
+            </div>
+            <div class="menu" id="mobile-menu">
+                
+                    <a class="menu-item" href="/archives">Posts</a>
+                
+                    <a class="menu-item" href="/category">Categories</a>
+                
+                    <a class="menu-item" href="/tag">Tags</a>
+                
+                    <a class="menu-item" href="/about">About</a>
+                
+            </div>
+        </div>
+    </nav>
+
+</header>
+<script>
+    var mobileBtn = function f() {
+        var toggleMenu = document.getElementsByClassName("menu-toggle")[0];
+        var mobileMenu = document.getElementById("mobile-menu");
+        if(toggleMenu.classList.contains("active")){
+           toggleMenu.classList.remove("active")
+            mobileMenu.classList.remove("active")
+        }else{
+            toggleMenu.classList.add("active")
+            mobileMenu.classList.add("active")
+        }
+    }
+</script>
+        <div class="main">
+            <div class="container">
+    
+    
+        <div class="post-toc">
+    <div class="tocbot-list">
+    </div>
+    <div class="tocbot-list-menu">
+        <a class="tocbot-toc-expand" onclick="expand_toc()">Expand all</a>
+        <a onclick="go_top()">Back to top</a>
+        <a onclick="go_bottom()">Go to bottom</a>
+    </div>
+</div>
+
+<script>
+    document.ready(
+        function () {
+            tocbot.init({
+                tocSelector: '.tocbot-list',
+                contentSelector: '.post-content',
+                headingSelector: 'h1, h2, h3, h4, h5',
+                collapseDepth: 1,
+                orderedList: false,
+                scrollSmooth: true,
+            })
+        }
+    )
+
+    function expand_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 6,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "collapse_toc()");
+        b.innerHTML = "Collapse all"
+    }
+
+    function collapse_toc() {
+        var b = document.querySelector(".tocbot-toc-expand");
+        tocbot.init({
+            tocSelector: '.tocbot-list',
+            contentSelector: '.post-content',
+            headingSelector: 'h1, h2, h3, h4, h5',
+            collapseDepth: 1,
+            orderedList: false,
+            scrollSmooth: true,
+        });
+        b.setAttribute("onclick", "expand_toc()");
+        b.innerHTML = "Expand all"
+    }
+
+    function go_top() {
+        window.scrollTo(0, 0);
+    }
+
+    function go_bottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+</script>
+    
+
+    
+    <article class="post-wrap">
+        <header class="post-header">
+            <h1 class="post-title">分布式协调与同步——分布式互斥</h1>
+            
+                <div class="post-meta">
+                    
+                        Author: <a itemprop="author" rel="author" href="/">羅小生</a>
+                    
+
+                    
+                        <span class="post-time">
+                        Date: <a href="#">十月 13, 2019&nbsp;&nbsp;23:15:40</a>
+                        </span>
+                    
+                    
+                        <span class="post-category">
+                    Category:
+                            
+                                <a href="/category/分布式/">分布式</a>
+                            
+                        </span>
+                    
+                </div>
+            
+        </header>
+
+        <div class="post-content">
+            <p><img src="/2019/10/13/分布式协调与同步——分布式互斥/head.png" alt="1571033772312"></p>
+<h1 id="分布式协调与同步——分布式互斥"><a href="#分布式协调与同步——分布式互斥" class="headerlink" title="分布式协调与同步——分布式互斥"></a>分布式协调与同步——分布式互斥</h1><h2 id="什么是分布式互斥"><a href="#什么是分布式互斥" class="headerlink" title="什么是分布式互斥"></a>什么是分布式互斥</h2><p>在分布式系统中，对于同一个共享资源，同一个时刻只能有一个程序使用，这种排他式资源访问方式，叫做分布式互斥（Distributed Mutaual Exclusion），而被分布式互斥访问的资源又叫做临界资源（Critical Resource）。</p>
+<h2 id="怎么样实现——互斥算法"><a href="#怎么样实现——互斥算法" class="headerlink" title="怎么样实现——互斥算法"></a>怎么样实现——互斥算法</h2><h3 id="集中式算法"><a href="#集中式算法" class="headerlink" title="集中式算法"></a>集中式算法</h3><p>又叫中央服务器算法。通过给分布式系统访问临界资源时，引入一个“<code>协调者</code>”程序的方式，得到一个分布式互斥算法。当有程序要去访问临界资源的时候，需要先去询问协调者，由协调者判断是否可以访问。这一点类似于并发下多线程对锁的竞争。协调者根据情况进行判断，如果这一时刻没有其他程序访问临界资源，则允许访问；如果有其他程序在访问，就给当前程序进行排队，一旦临界资源被访问完毕，协调者就从队伍中取出最前面的程序请求，给它访问权限。</p>
+<p><img src="/2019/10/13/分布式协调与同步——分布式互斥/1.1.png" alt="1570978417584"></p>
+<p><strong>优点</strong>：简单，直观，易实现；各程序间不需要互相访问。</p>
+<p><strong>缺点</strong>：容易引发单点故障（协调者）；协调者容易成为系统性能瓶颈。</p>
+<p>总而言之，单选用集中式算法时，一定要选用<strong>性能好</strong>，<strong>可靠性高</strong>的服务器。或者中央服务器需要做<strong>主从配置</strong>，一旦主机故障，从机立马抵上。</p>
+<h3 id="分布式算法"><a href="#分布式算法" class="headerlink" title="分布式算法"></a>分布式算法</h3><p>既然集中式的总裁算法容易引起单点故障，那么是否可以通过不要协调者，而是各个程序通过协商的方式来内部商讨谁来访问临界资源？但一个程序要想访问临界资源的时候，给每个其他程序批量发送询问消息——“我可以使用临界资源吗？”，在收到其他程序的全部同意消息返回时，才可以去访问临界资源。其他程序在收到请求消息的时候，如果自己不在使用或者即将使用（已经发出请求信息），则返回同意消息；反之，等自己使用完毕才返回同意消息。（利用队列来维护收到的请求）</p>
+<p>请求消息需要包含所请求的资源、请求者的 ID，以及发起请求的时间戳。</p>
+<p>这就是民主协商的分布式算法，或者称为使用了组播和逻辑时钟的算法。</p>
+<p><img src="/2019/10/13/分布式协调与同步——分布式互斥/1.2.png" alt="1571030700207"></p>
+<p><strong>优点</strong>：简单易懂，易实现；</p>
+<p><strong>缺点</strong>：各程序间需要知道彼此的通信地址；当分布式系统组件增多的时候，容易产生“指令风暴”，即程序处理指令的时间比自身业务还要多，加大了系统资源开销；一个程序出现故障，无法回复信息，其他程序处于等待信息状态，整个系统会出现停滞。</p>
+<p>针对缺点，可以做改进，当系统规模比较大的时候，可以引入一个<code>注册中心</code>，当程序上线的时候去注册中心注册自己，并且一定间隔更新自己的状态，当一个程序需要访问临界资源的时候，先去注册中心获取其他程序的地址以及状态，预先发送一条检测信息，<u>当检测到一个程序出现异常的时候，则忽略，不发出请求</u>；如果规模比较小可以考虑不引入注册中心，直接配置组件间地址。</p>
+<p>这个算法<strong>适用于系统节点比较少且变动不频繁，且各个程序需要互相通信，适合p2p系统</strong>；典型的有分布式文件系统HDFS的文件修改。</p>
+<h3 id="令牌环算法"><a href="#令牌环算法" class="headerlink" title="令牌环算法"></a>令牌环算法</h3><p>互斥算法中除了集中式，分布式算法，是否还有其他算法？答案是肯定的，比较方法总比问题多。华为独创的轮值CEO其实给我们提供了思路。CEO可以看作是临界资源，每次只有一个人可以当（访问）。那么，在分布式互斥场景中，是否可以考虑引入一个“CEO令牌”，然后在各程序间按照一定顺序传递，拿到令牌的程序先判断自己是否需要访问资源，不是的话传递给下一个，反之，先自己访问资源然后再传递给下一个。</p>
+<p><img src="/2019/10/13/分布式协调与同步——分布式互斥/1.3.png" alt="1571032683797"></p>
+<p><strong>优点</strong>：公平；通信回数少；稳定性高。</p>
+<p><strong>缺点</strong>：非实时，需要等令牌传的手上才能访问。</p>
+<p>令牌环算法适用于<strong>系统规模小，临界资源访问频繁但访问速度快时间短</strong>的系统。</p>
+<h3 id="多层令牌环算法"><a href="#多层令牌环算法" class="headerlink" title="多层令牌环算法"></a>多层令牌环算法</h3><p>其实上面提到的三种算法都不适用于系统规模大的分布式中，那么是否有一种算法可以对应大规模系统呢？实际上，当大规模系统需要访问临界资源的场景下，首先需要做的是临界资源的拆分，因为无论出于哪种考虑，大规模系统同时访问以临界资源，本身就是一个不合理的事情；如果非要说实际上就是这样，那么可以考虑采用多层令牌环的算法。</p>
+<p>多层令牌环和单层令牌环本质上没有多少区别，就是小规模系统的单层令牌在大规模系统中的应用，将大系统分而治之，根据预先设定的规则，拆分成小系统，每个小系统都采用令牌环，总的系统只用一个令牌，从大系统到小系统依次传递。</p>
+<h2 id="一图论之"><a href="#一图论之" class="headerlink" title="一图论之"></a>一图论之</h2><h2 id><a href="#" class="headerlink" title></a><img src="/2019/10/13/分布式协调与同步——分布式互斥/1.sum.png" alt="1571033546506"></h2>
+        </div>
+
+        
+            <section class="post-copyright">
+                
+                    <p class="copyright-item">
+                        <span>Author:</span>
+                        <span>羅小生</span>
+                    </p>
+                
+                
+                
+                    <p class="copyright-item">
+                        <span>License:</span>
+                        <span>Copyright (c) 2019 <a href="http://creativecommons.org/licenses/by-nc/4.0/">CC-BY-NC-4.0</a> LICENSE</span>
+                    </p>
+                
+                
+
+            </section>
+        
+        <section class="post-tags">
+            <div>
+                <span>Tag(s):</span>
+                <span class="tag">
+                    
+                    
+                        <a href="/tag/分布式协调与同步/"># 分布式协调与同步</a>
+                    
+                        
+                </span>
+            </div>
+            <div>
+                <a href="javascript:window.history.back();">back</a>
+                <span>· </span>
+                <a href="/">home</a>
+            </div>
+        </section>
+        <section class="post-nav">
+            
+            
+            <a class="next" rel="next" href="/2019/10/12/浅尝JVM的工具集/">浅尝JVM的工具集</a>
+            
+        </section>
+
+
+    </article>
+</div>
+
+        </div>
+        <footer id="footer" class="footer">
+    <div class="copyright">
+        <span>© <a href="https://akatouxin.github.io/about/" target="_blank">羅小生</a> | <a href="https://github.com/akatouXin" target="_blank">人若无名，则潜心练剑.</a></span>
+    </div>
+</footer>
+
+    </div>
+</body>
+</html>
